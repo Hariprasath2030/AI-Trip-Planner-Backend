@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from app.core.database import get_supabase, get_user_client
 from app.core.errors import APIError, error_response
-from app.schemas.trips import (
+from app.schemas.auth import (
     AuthResponse,
     ProfileOut,
     RefreshRequest,
@@ -30,12 +30,12 @@ def _fetch_profile(access_token: str, user_id: str) -> ProfileOut | None:
         client.table("profiles")
         .select("id, email, full_name, avatar_url, created_at, updated_at")
         .eq("id", user_id)
-        .maybe_single()
         .execute()
     )
-    if not response.data:
+    rows = response.data or []
+    if not rows:
         return None
-    return ProfileOut(**response.data)
+    return ProfileOut(**rows[0])
 
 
 @router.post("/sign-up", response_model=AuthResponse)
