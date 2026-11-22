@@ -31,12 +31,12 @@ def _get_owned_trip(trip_id: UUID, claims: dict) -> dict:
         .select("*")
         .eq("id", str(trip_id))
         .eq("user_id", user_id)
-        .maybe_single()
         .execute()
     )
-    if not response.data:
+    rows = response.data or []
+    if not rows:
         raise APIError("Trip not found", 404)
-    return response.data
+    return rows[0]
 
 
 @router.get("", response_model=list[TripOut])
